@@ -700,9 +700,13 @@ function Dashboard({ data, filters, setFilters }) {
     const monthKeys = Object.keys(byMonth).sort();
     let momChange = null;
     let momLabel = '—';
+    let momLatestAmount = null;
+    let momPrevAmount = null;
     if (monthKeys.length >= 2) {
       const latest = byMonth[monthKeys[monthKeys.length - 1]];
       const prev = byMonth[monthKeys[monthKeys.length - 2]];
+      momLatestAmount = latest;
+      momPrevAmount = prev;
       if (prev) {
         momChange = ((latest - prev) / prev) * 100;
         momLabel = monthKeys[monthKeys.length - 1] + ' vs ' + monthKeys[monthKeys.length - 2];
@@ -725,6 +729,8 @@ function Dashboard({ data, filters, setFilters }) {
       avgUnitPrice,
       momChange,
       momLabel,
+      momLatestAmount,
+      momPrevAmount,
       discounts,
       credits,
       creditCount,
@@ -1070,7 +1076,9 @@ function Dashboard({ data, filters, setFilters }) {
         <Kpi
           label="MOM Change"
           value={kpis.momChange == null ? '—' : (kpis.momChange >= 0 ? '+' : '') + kpis.momChange.toFixed(1) + '%'}
-          sub={kpis.momLabel}
+          sub={kpis.momPrevAmount != null && kpis.momLatestAmount != null
+            ? `${fmtMoney(kpis.momPrevAmount)} → ${fmtMoney(kpis.momLatestAmount)} · ${kpis.momLabel}`
+            : kpis.momLabel}
         />
       </div>
 
