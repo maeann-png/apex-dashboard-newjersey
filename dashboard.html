@@ -1188,11 +1188,23 @@ function Dashboard({ data, filters, setFilters }) {
                     innerRadius={60}
                     outerRadius={110}
                     paddingAngle={2}
-                    stroke="#0f1210"
+                    stroke="#110a1a"
                     strokeWidth={2}
                   >
                     {byCategory.map((_, i) => {
-                      const colors = ['#d24a92', '#a03d75', '#b48fd4', '#7a3fa0', '#f0a868', '#e07594', '#6e587d'];
+                      // Dark-to-light purple/magenta ramp.
+                      // Slices are sorted by revenue (largest first), so the darkest
+                      // shade represents the biggest category and partitions are
+                      // visibly distinct.
+                      const colors = [
+                        '#3d1a4d',  // darkest — deep aubergine
+                        '#5a2670',  // deep purple
+                        '#7a3fa0',  // brand deep purple
+                        '#a056c2',  // mid violet
+                        '#c074d8',  // light violet
+                        '#d8a3e8',  // soft lavender
+                        '#ecd1f5',  // lightest — pale lilac
+                      ];
                       return <Cell key={i} fill={colors[i % colors.length]} />;
                     })}
                   </Pie>
