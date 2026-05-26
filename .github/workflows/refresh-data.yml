@@ -49,8 +49,13 @@ jobs:
           # Pulled from repo Secrets — see README for setup instructions.
           # Token is masked in logs; never printed even if scraper.py tried to.
           LEAFLINK_TOKEN: ${{ secrets.LEAFLINK_TOKEN }}
+          # Pull everything since May 1, 2025 (absolute start date — overrides DAYS_BACK)
+          LEAFLINK_START_DATE: "2025-05-01"
           LEAFLINK_DAYS_BACK: "365"
           LEAFLINK_STATE: "NJ"
+          # Only Chill Medicated products. Case-insensitive substring match
+          # against the resolved brand name. Set "" to disable.
+          LEAFLINK_BRAND_FILTER: "Chill Medicated"
           LEAFLINK_DOMAIN: "app.leaflink.com"
         run: python scraper.py
 
@@ -66,4 +71,3 @@ jobs:
             git commit -m "chore: refresh sales data ($(date -u +%Y-%m-%dT%H:%MZ))"
             git push
           fi
-
