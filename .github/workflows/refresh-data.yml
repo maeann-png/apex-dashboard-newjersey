@@ -1,1 +1,69 @@
+name: Refresh sales data
+
+# When this workflow runs:
+#   1. Automatically every 15 minutes (the cron schedule below)
+#   2. On demand — anyone with repo access can hit "Run workflow" in the Actions tab
+#   3. Every push to main — keeps data fresh after code changes
+on:
+  schedule:
+    # cron in UTC. "*/15 * * * *" = every 15 minutes.
+    # NOTE: GitHub's scheduler runs at "best effort" — may slip by a few minutes
+    # under heavy load. If you want hourly instead, use "0 * * * *".
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}   # adds a manual "Run workflow" button in the Actions UI
+  push:
+    branches: [main]
+    paths:
+      - "scraper.py"      # rerun if scraper logic changes
+
+# Allow this workflow to push commits (sales_data.json) back to the repo.
+permissions:
+  contents: write
+
+# Don't run two refreshes at once — cancels any in-flight run if a new one starts.
+concurrency:
+  group: refresh-sales-data
+  cancel-in-progress: false  # let in-flight runs finish to avoid half-written commits
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run scraper
+        env:
+          # Pulled from repo Secrets — see README for setup instructions.
+          # Token is masked in logs; never printed even if scraper.py tried to.
+          LEAFLINK_TOKEN: ${{ secrets.LEAFLINK_TOKEN }}
+          LEAFLINK_DAYS_BACK: "365"
+          LEAFLINK_STATE: "NJ"
+          LEAFLINK_DOMAIN: "app.leaflink.com"
+        run: python scraper.py
+
+      - name: Commit & push refreshed data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f sales_data.json
+          # Only commit if there are actual changes. This keeps history clean.
+          if git diff --staged --quiet; then
+            echo "No changes in sales_data.json — skipping commit."
+          else
+            git commit -m "chore: refresh sales data ($(date -u +%Y-%m-%dT%H:%MZ))"
+            git push
+          fi
 
