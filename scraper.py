@@ -520,13 +520,22 @@ def fetch_category_lookup(session: requests.Session) -> dict:
     lookup: dict = {}
     try:
         # No batching needed — usually < 20 categories
+        first_logged = False
         for cat in paginate(session, "/product-categories/", {"limit": PAGE_SIZE}):
+            if not first_logged:
+                print(f"  DEBUG category response keys: {sorted(cat.keys())}", file=sys.stderr)
+                print(f"  DEBUG category sample: {json.dumps(cat, indent=2)[:500]}", file=sys.stderr)
+                first_logged = True
             cid = cat.get("id")
-            name = cat.get("name") or cat.get("display_name") or ""
+            # Try every plausible field name
+            name = (cat.get("name") or cat.get("display_name") or
+                    cat.get("category_name") or cat.get("label") or
+                    cat.get("title") or "")
             if cid and name:
                 lookup[cid] = name
     except SystemExit:
         print("  warning: category lookup failed; category column will be blank", file=sys.stderr)
+    print(f"  Category lookup resolved {len(lookup)} name(s)")
     return lookup
 
 
@@ -539,6 +548,7 @@ def fetch_customer_lookup(session: requests.Session, customer_ids: set) -> dict:
     ids = sorted(c for c in customer_ids if c)
     print(f"Resolving {len(ids)} customer(s)...")
     lookup: dict = {}
+    first_logged = False
     for cid in ids:
         try:
             data = _get(session, f"/customers/{cid}/", {})
@@ -546,12 +556,23 @@ def fetch_customer_lookup(session: requests.Session, customer_ids: set) -> dict:
             # Don't kill the whole run; print and continue
             print(f"  warning: customer {cid} lookup failed; will show as blank", file=sys.stderr)
             continue
-        # Try a few field names that LeafLink might use
+        if not first_logged:
+            print(f"  DEBUG customer response keys: {sorted(data.keys())}", file=sys.stderr)
+            print(f"  DEBUG customer sample: {json.dumps(data, indent=2)[:800]}", file=sys.stderr)
+            first_logged = True
+        # Try every plausible field name LeafLink might use for the customer's name
         name = (data.get("display_name") or data.get("name") or
-                data.get("company_name") or "")
+                data.get("company_name") or data.get("nickname") or
+                data.get("dba_name") or "")
+        # Some endpoints nest the name under "company" or "buyer"
+        if not name and isinstance(data.get("company"), dict):
+            name = data["company"].get("name") or data["company"].get("display_name") or ""
+        if not name and isinstance(data.get("buyer"), dict):
+            name = data["buyer"].get("name") or data["buyer"].get("display_name") or ""
         if name:
             lookup[cid] = name
         time.sleep(SLEEP_BETWEEN_PAGES_SEC / 2)
+    print(f"  Customer lookup resolved {len(lookup)} of {len(ids)} name(s)")
     return lookup
 
 
@@ -564,23 +585,48 @@ def fetch_sales_rep_lookup(session: requests.Session, rep_ids: set) -> dict:
     ids = sorted(r for r in rep_ids if r)
     print(f"Resolving {len(ids)} sales rep(s)...")
     lookup: dict = {}
+    first_logged = False
     for rid in ids:
         try:
             data = _get(session, f"/company-staff/{rid}/", {})
         except SystemExit:
             print(f"  warning: sales rep {rid} lookup failed; will show as blank", file=sys.stderr)
             continue
-        # company-staff likely returns user_first_name, user_last_name, or user dict
+        if not first_logged:
+            print(f"  DEBUG company-staff response keys: {sorted(data.keys())}", file=sys.stderr)
+            print(f"  DEBUG company-staff sample: {json.dumps(data, indent=2)[:800]}", file=sys.stderr)
+            first_logged = True
+        # Try every plausible field combination
         name = ""
-        first = data.get("user_first_name") or ""
-        last = data.get("user_last_name") or ""
+        # First, try first+last name combinations
+        first = (data.get("user_first_name") or data.get("first_name") or
+                 data.get("firstName") or "")
+        last = (data.get("user_last_name") or data.get("last_name") or
+                data.get("lastName") or "")
         if first or last:
             name = f"{first} {last}".strip()
+        # If still nothing, look for a nested user object
+        if not name and isinstance(data.get("user"), dict):
+            u = data["user"]
+            ufirst = u.get("first_name") or u.get("firstName") or ""
+            ulast = u.get("last_name") or u.get("lastName") or ""
+            if ufirst or ulast:
+                name = f"{ufirst} {ulast}".strip()
+            if not name:
+                name = u.get("full_name") or u.get("display_name") or u.get("username") or u.get("email") or ""
+        # Last resort: scalar user field or other names
         if not name:
-            name = data.get("user") or data.get("name") or data.get("username") or ""
+            user_val = data.get("user")
+            if isinstance(user_val, str):
+                name = user_val
+        if not name:
+            name = (data.get("full_name") or data.get("display_name") or
+                    data.get("name") or data.get("username") or
+                    data.get("email") or "")
         if name:
             lookup[rid] = name
         time.sleep(SLEEP_BETWEEN_PAGES_SEC / 2)
+    print(f"  Sales rep lookup resolved {len(lookup)} of {len(ids)} name(s)")
     return lookup
 
 
