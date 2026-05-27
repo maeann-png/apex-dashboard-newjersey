@@ -249,12 +249,23 @@ def _compute_line_total_cents(line_item: dict, order_discount_dollars: float,
                               order_discount_type: str, order_subtotal_dollars: float) -> tuple[int, int]:
     """
     Compute the line item's (line_total_cents, discount_cents) given:
-      - line item's quantity × sale_price (or ordered_unit_price if no sale_price)
+      - line item's quantity × per-unit price
       - the order's order-level discount, allocated proportionally across lines
 
-    LeafLink's order has ONE discount field (either % or $) that applies to the
-    whole order. The MA dashboard's data shape expects per-line discounts. So we
-    allocate the order discount across lines proportionally by line subtotal.
+    LeafLink quirk: in this account, `quantity` is in UNITS, but the price
+    fields (`sale_price`, `ordered_unit_price`) are PER-CASE prices. The line
+    item also carries `unit_multiplier` which tells you how many units are
+    in one case. So the per-unit price = case_price / unit_multiplier, and:
+
+        line_subtotal = quantity_in_units × (case_price / unit_multiplier)
+                      = (quantity / unit_multiplier) × case_price
+
+    Reference: a typical order line ships 15 units of a $525-per-case product,
+    and LeafLink's UI/CSV both show line_item_total = $525 — i.e., 1 case worth.
+
+    LeafLink also has only ONE discount field (either % or $) that applies to
+    the whole order. The MA dashboard's data shape expects per-line discounts,
+    so we allocate the order discount across lines proportional to subtotal.
     """
     qty = _to_decimal(line_item.get("quantity"))
     sale = line_item.get("sale_price")
@@ -262,8 +273,20 @@ def _compute_line_total_cents(line_item: dict, order_discount_dollars: float,
     # Prefer sale_price if it's nonzero; fall back to ordered_unit_price
     sale_cents = _money_to_cents(sale)
     ordered_cents = _money_to_cents(ordered)
-    unit_cents = sale_cents if sale_cents > 0 else ordered_cents
-    line_subtotal_cents = int(round(unit_cents * qty))
+    case_cents = sale_cents if sale_cents > 0 else ordered_cents
+
+    # unit_multiplier = how many units fit in one case (default 1 if missing)
+    multiplier = line_item.get("unit_multiplier") or 1
+    try:
+        multiplier = float(multiplier)
+        if multiplier <= 0:
+            multiplier = 1.0
+    except (TypeError, ValueError):
+        multiplier = 1.0
+
+    # Tax-type line items have multiplier=1 and qty=1 — formula degenerates
+    # to case_price × 1 = case_price, which is correct.
+    line_subtotal_cents = int(round((qty / multiplier) * case_cents))
 
     # Allocate this order's discount to this line, proportional to subtotal
     if order_discount_dollars <= 0 or order_subtotal_dollars <= 0:
@@ -286,14 +309,25 @@ def _compute_line_total_cents(line_item: dict, order_discount_dollars: float,
 
 def _order_subtotal_dollars(order: dict) -> float:
     """Compute the pre-discount subtotal of an order from its line items.
-    Used to allocate the order-level discount across lines."""
+    Used to allocate the order-level discount across lines.
+
+    Same units/cases logic as _compute_line_total_cents: price fields are
+    per-case, quantity is in units, so we divide qty by unit_multiplier.
+    """
     subtotal = 0.0
     for li in order.get("line_items") or []:
         qty = _to_decimal(li.get("quantity"))
         sale_cents = _money_to_cents(li.get("sale_price"))
         ordered_cents = _money_to_cents(li.get("ordered_unit_price"))
-        unit_cents = sale_cents if sale_cents > 0 else ordered_cents
-        subtotal += (unit_cents / 100.0) * qty
+        case_cents = sale_cents if sale_cents > 0 else ordered_cents
+        multiplier = li.get("unit_multiplier") or 1
+        try:
+            multiplier = float(multiplier)
+            if multiplier <= 0:
+                multiplier = 1.0
+        except (TypeError, ValueError):
+            multiplier = 1.0
+        subtotal += (case_cents / 100.0) * (qty / multiplier)
     return subtotal
 
 
@@ -351,7 +385,18 @@ def normalize_order_to_rows(order: dict) -> list[dict]:
         )
         sale_cents = _money_to_cents(li.get("sale_price"))
         ordered_cents = _money_to_cents(li.get("ordered_unit_price"))
-        unit_cents = sale_cents if sale_cents > 0 else ordered_cents
+        case_cents = sale_cents if sale_cents > 0 else ordered_cents
+
+        # Per-unit price = case price / units per case. Display fields show
+        # this per-unit value so totals reconcile: qty (units) × unit_price = line_total.
+        li_multiplier = li.get("unit_multiplier") or 1
+        try:
+            li_multiplier_f = float(li_multiplier)
+            if li_multiplier_f <= 0:
+                li_multiplier_f = 1.0
+        except (TypeError, ValueError):
+            li_multiplier_f = 1.0
+        unit_cents = int(round(case_cents / li_multiplier_f))
 
         # Pull product display info. LeafLink returns `product` as either an id
         # (string) or, when expanded, a full object. The orders endpoint with
