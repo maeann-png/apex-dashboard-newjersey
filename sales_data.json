@@ -1,10 +1,10 @@
 {
-  "fetched_at": "2026-06-24T19:33:05.138048+00:00",
+  "fetched_at": "2026-06-24T19:47:32.306907+00:00",
   "source": "leaflink-v2-api",
   "state": "NJ",
   "days_back": 365,
-  "orders_seen": 1404,
-  "orders_kept": 1378,
+  "orders_seen": 1405,
+  "orders_kept": 1379,
   "inventory": [
     {
       "id": "2675942",
@@ -47,8 +47,8 @@
       "brand": "Chill Medicated",
       "status": "available",
       "inventory": 40.0,
-      "reserved": 0.0,
-      "available": 40.0
+      "reserved": 15.0,
+      "available": 25.0
     },
     {
       "id": "2675961",
@@ -58,8 +58,8 @@
       "brand": "Chill Medicated",
       "status": "available",
       "inventory": 369.0,
-      "reserved": 0.0,
-      "available": 369.0
+      "reserved": 15.0,
+      "available": 354.0
     },
     {
       "id": "2675960",
@@ -69,8 +69,8 @@
       "brand": "Chill Medicated",
       "status": "available",
       "inventory": 282.0,
-      "reserved": 0.0,
-      "available": 282.0
+      "reserved": 15.0,
+      "available": 267.0
     },
     {
       "id": "2675949",
@@ -80,8 +80,8 @@
       "brand": "Chill Medicated",
       "status": "available",
       "inventory": 105.0,
-      "reserved": 0.0,
-      "available": 105.0
+      "reserved": 15.0,
+      "available": 90.0
     },
     {
       "id": "2675943",
@@ -140,6 +140,190 @@
     }
   ],
   "rows": [
+    {
+      "order_id": "7e164219-fada-4afe-be4c-7a10192dd14b",
+      "order_number": "US10367412",
+      "number": "7e164219-fada-4afe-be4c-7a10192dd14b",
+      "order_date_utc": "2026-06-24T15:41:37-04:00",
+      "order_date_utc_raw": "2026-06-24T15:41:37-04:00",
+      "order_date_localized": "2026-06-24T15:41:37-04:00",
+      "order_date_localized_raw": "2026-06-24T15:41:37-04:00",
+      "order_date": "06/24/2026",
+      "order_date_raw": "2026-06-24T15:41:37-04:00",
+      "delivery_date": "",
+      "delivery_date_raw": "",
+      "paid_date": "",
+      "buyer_name": "Collective Beleaf",
+      "buyer_state": "NJ",
+      "buyer_city": "Lambertville",
+      "buyer_zip": "08530",
+      "product_id": 2675960,
+      "product_name": "Chill Medicated - MAXX  Vanilla Lust 1000mg THC: 1000mg CBD Body Rub",
+      "product_brand": "Chill Medicated",
+      "brand": "Chill Medicated",
+      "product_type": "Topicals",
+      "quantity_raw": 15.0,
+      "quantity": 15.0,
+      "order_quantity": 15.0,
+      "unit_multiplier": 15,
+      "line_total_raw": 47250,
+      "line_total": "$472.50",
+      "computed_sale_price": "$35.00",
+      "product_listing_price": "$525.00",
+      "unit_price": "$35.00",
+      "discounts": 5250,
+      "additional_discounts": 0,
+      "batch_cost_of_goods": "",
+      "order_status": "Submitted",
+      "payment_status": "Submitted",
+      "classification": "Adult Use",
+      "sales_rep": "Peter Casey",
+      "sales_reps": "Peter Casey",
+      "sales_reps_display": "Peter Casey",
+      "payment_dates": [],
+      "is_sample": false,
+      "notes": "",
+      "product_sku": "49f1a5e48e1b96a679e6",
+      "current_inventory": 267.0
+    },
+    {
+      "order_id": "7e164219-fada-4afe-be4c-7a10192dd14b",
+      "order_number": "US10367412",
+      "number": "7e164219-fada-4afe-be4c-7a10192dd14b",
+      "order_date_utc": "2026-06-24T15:41:37-04:00",
+      "order_date_utc_raw": "2026-06-24T15:41:37-04:00",
+      "order_date_localized": "2026-06-24T15:41:37-04:00",
+      "order_date_localized_raw": "2026-06-24T15:41:37-04:00",
+      "order_date": "06/24/2026",
+      "order_date_raw": "2026-06-24T15:41:37-04:00",
+      "delivery_date": "",
+      "delivery_date_raw": "",
+      "paid_date": "",
+      "buyer_name": "Collective Beleaf",
+      "buyer_state": "NJ",
+      "buyer_city": "Lambertville",
+      "buyer_zip": "08530",
+      "product_id": 2675950,
+      "product_name": "Chill Medicated - MAXX 1000mg THC: 1000mg CBD Body Rub",
+      "product_brand": "Chill Medicated",
+      "brand": "Chill Medicated",
+      "product_type": "Topicals",
+      "quantity_raw": 15.0,
+      "quantity": 15.0,
+      "order_quantity": 15.0,
+      "unit_multiplier": 15,
+      "line_total_raw": 47250,
+      "line_total": "$472.50",
+      "computed_sale_price": "$35.00",
+      "product_listing_price": "$525.00",
+      "unit_price": "$35.00",
+      "discounts": 5250,
+      "additional_discounts": 0,
+      "batch_cost_of_goods": "",
+      "order_status": "Submitted",
+      "payment_status": "Submitted",
+      "classification": "Adult Use",
+      "sales_rep": "Peter Casey",
+      "sales_reps": "Peter Casey",
+      "sales_reps_display": "Peter Casey",
+      "payment_dates": [],
+      "is_sample": false,
+      "notes": "",
+      "product_sku": "4d5c9b1162b6431d6c6c",
+      "current_inventory": 25.0
+    },
+    {
+      "order_id": "7e164219-fada-4afe-be4c-7a10192dd14b",
+      "order_number": "US10367412",
+      "number": "7e164219-fada-4afe-be4c-7a10192dd14b",
+      "order_date_utc": "2026-06-24T15:41:37-04:00",
+      "order_date_utc_raw": "2026-06-24T15:41:37-04:00",
+      "order_date_localized": "2026-06-24T15:41:37-04:00",
+      "order_date_localized_raw": "2026-06-24T15:41:37-04:00",
+      "order_date": "06/24/2026",
+      "order_date_raw": "2026-06-24T15:41:37-04:00",
+      "delivery_date": "",
+      "delivery_date_raw": "",
+      "paid_date": "",
+      "buyer_name": "Collective Beleaf",
+      "buyer_state": "NJ",
+      "buyer_city": "Lambertville",
+      "buyer_zip": "08530",
+      "product_id": 2675961,
+      "product_name": "Chill Medicated - MAXX Majestic Mint 1000mg THC: 1000mg CBD Body Rub",
+      "product_brand": "Chill Medicated",
+      "brand": "Chill Medicated",
+      "product_type": "Topicals",
+      "quantity_raw": 15.0,
+      "quantity": 15.0,
+      "order_quantity": 15.0,
+      "unit_multiplier": 15,
+      "line_total_raw": 47250,
+      "line_total": "$472.50",
+      "computed_sale_price": "$35.00",
+      "product_listing_price": "$525.00",
+      "unit_price": "$35.00",
+      "discounts": 5250,
+      "additional_discounts": 0,
+      "batch_cost_of_goods": "",
+      "order_status": "Submitted",
+      "payment_status": "Submitted",
+      "classification": "Adult Use",
+      "sales_rep": "Peter Casey",
+      "sales_reps": "Peter Casey",
+      "sales_reps_display": "Peter Casey",
+      "payment_dates": [],
+      "is_sample": false,
+      "notes": "",
+      "product_sku": "4e3596d2a7ab898be2a3",
+      "current_inventory": 354.0
+    },
+    {
+      "order_id": "7e164219-fada-4afe-be4c-7a10192dd14b",
+      "order_number": "US10367412",
+      "number": "7e164219-fada-4afe-be4c-7a10192dd14b",
+      "order_date_utc": "2026-06-24T15:41:37-04:00",
+      "order_date_utc_raw": "2026-06-24T15:41:37-04:00",
+      "order_date_localized": "2026-06-24T15:41:37-04:00",
+      "order_date_localized_raw": "2026-06-24T15:41:37-04:00",
+      "order_date": "06/24/2026",
+      "order_date_raw": "2026-06-24T15:41:37-04:00",
+      "delivery_date": "",
+      "delivery_date_raw": "",
+      "paid_date": "",
+      "buyer_name": "Collective Beleaf",
+      "buyer_state": "NJ",
+      "buyer_city": "Lambertville",
+      "buyer_zip": "08530",
+      "product_id": 2675949,
+      "product_name": "Chill Medicated - RELAX 500mg THC: 500mg CBD Body Rub",
+      "product_brand": "Chill Medicated",
+      "brand": "Chill Medicated",
+      "product_type": "Topicals",
+      "quantity_raw": 15.0,
+      "quantity": 15.0,
+      "order_quantity": 15.0,
+      "unit_multiplier": 15,
+      "line_total_raw": 27000,
+      "line_total": "$270.00",
+      "computed_sale_price": "$20.00",
+      "product_listing_price": "$300.00",
+      "unit_price": "$20.00",
+      "discounts": 3000,
+      "additional_discounts": 0,
+      "batch_cost_of_goods": "",
+      "order_status": "Submitted",
+      "payment_status": "Submitted",
+      "classification": "Adult Use",
+      "sales_rep": "Peter Casey",
+      "sales_reps": "Peter Casey",
+      "sales_reps_display": "Peter Casey",
+      "payment_dates": [],
+      "is_sample": false,
+      "notes": "",
+      "product_sku": "4434adc7323607418729",
+      "current_inventory": 90.0
+    },
     {
       "order_id": "8967f0e2-da67-4b0c-ba0c-63cb50507a67",
       "order_number": "US10367381",
@@ -230,7 +414,7 @@
       "is_sample": false,
       "notes": "delivery asap",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "53ec0059-932e-48b1-8fc0-ba9d3adbd75d",
@@ -276,7 +460,7 @@
       "is_sample": false,
       "notes": "delivery asap",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "53ec0059-932e-48b1-8fc0-ba9d3adbd75d",
@@ -322,7 +506,7 @@
       "is_sample": false,
       "notes": "delivery asap",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "53ec0059-932e-48b1-8fc0-ba9d3adbd75d",
@@ -368,7 +552,7 @@
       "is_sample": false,
       "notes": "delivery asap",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "53ec0059-932e-48b1-8fc0-ba9d3adbd75d",
@@ -1288,7 +1472,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "e2765766-fefa-4c8d-890d-e4798a85f0ae",
@@ -1334,7 +1518,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "e2765766-fefa-4c8d-890d-e4798a85f0ae",
@@ -1564,7 +1748,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "963209af-18e9-46dc-8020-789668c4c6eb",
@@ -2116,7 +2300,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "802b5b27-9b5d-44df-ad8f-4a8cfba3a402",
@@ -2162,7 +2346,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "802b5b27-9b5d-44df-ad8f-4a8cfba3a402",
@@ -2208,7 +2392,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "802b5b27-9b5d-44df-ad8f-4a8cfba3a402",
@@ -2254,7 +2438,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "802b5b27-9b5d-44df-ad8f-4a8cfba3a402",
@@ -2392,7 +2576,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "802b5b27-9b5d-44df-ad8f-4a8cfba3a402",
@@ -2576,7 +2760,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "26c87984-cb65-4440-8d28-5ee9c0e55bb1",
@@ -2622,7 +2806,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "26c87984-cb65-4440-8d28-5ee9c0e55bb1",
@@ -2668,7 +2852,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "26c87984-cb65-4440-8d28-5ee9c0e55bb1",
@@ -4554,7 +4738,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "a5275730-d98f-44c4-ba4a-d82459449b70",
@@ -4600,7 +4784,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "a5275730-d98f-44c4-ba4a-d82459449b70",
@@ -4738,7 +4922,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "a5275730-d98f-44c4-ba4a-d82459449b70",
@@ -5152,7 +5336,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "4c6b3a8e-803f-4f36-9502-4cffd893b3db",
@@ -5198,7 +5382,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "4c6b3a8e-803f-4f36-9502-4cffd893b3db",
@@ -5382,7 +5566,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "4c6b3a8e-803f-4f36-9502-4cffd893b3db",
@@ -5704,7 +5888,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "2207008f-c065-47c7-86d2-7ecdde466d73",
@@ -5750,7 +5934,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "2207008f-c065-47c7-86d2-7ecdde466d73",
@@ -5934,7 +6118,7 @@
       "is_sample": true,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "2207008f-c065-47c7-86d2-7ecdde466d73",
@@ -6302,7 +6486,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "1e6a72f5-e13c-437a-bb62-c2499240a872",
@@ -6670,7 +6854,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "a043ec62-c7fc-441a-b656-a6cc236ee31f",
@@ -6900,7 +7084,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "a043ec62-c7fc-441a-b656-a6cc236ee31f",
@@ -7038,7 +7222,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "9c567f11-69ab-40b4-96fd-959a5136e04e",
@@ -7084,7 +7268,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "9c567f11-69ab-40b4-96fd-959a5136e04e",
@@ -7130,7 +7314,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "9c567f11-69ab-40b4-96fd-959a5136e04e",
@@ -7176,7 +7360,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "9c567f11-69ab-40b4-96fd-959a5136e04e",
@@ -7268,7 +7452,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "a0341fda-449d-4c43-aea4-1d5031d5ffb2",
@@ -7314,7 +7498,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "a0341fda-449d-4c43-aea4-1d5031d5ffb2",
@@ -7360,7 +7544,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "a0341fda-449d-4c43-aea4-1d5031d5ffb2",
@@ -7406,7 +7590,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "a0341fda-449d-4c43-aea4-1d5031d5ffb2",
@@ -7774,7 +7958,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "d64363fd-1bed-47c5-a6e3-394f18c84285",
@@ -7820,7 +8004,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "d64363fd-1bed-47c5-a6e3-394f18c84285",
@@ -7958,7 +8142,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "ea5f9a39-5b45-4950-bbf8-04e26d10beb3",
@@ -8004,7 +8188,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "ea5f9a39-5b45-4950-bbf8-04e26d10beb3",
@@ -8050,7 +8234,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "ea5f9a39-5b45-4950-bbf8-04e26d10beb3",
@@ -8096,7 +8280,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "ea5f9a39-5b45-4950-bbf8-04e26d10beb3",
@@ -8234,7 +8418,7 @@
       "is_sample": true,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "3817e56e-d341-49dc-95e9-3a4d802c74fd",
@@ -8280,7 +8464,7 @@
       "is_sample": true,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "4abb1745-eecb-4461-a3a2-508439783323",
@@ -8372,7 +8556,7 @@
       "is_sample": true,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "55b285ac-0c83-4969-8919-bf7063c6755a",
@@ -8418,7 +8602,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "55b285ac-0c83-4969-8919-bf7063c6755a",
@@ -8464,7 +8648,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "55b285ac-0c83-4969-8919-bf7063c6755a",
@@ -8924,7 +9108,7 @@
       "is_sample": true,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "55b285ac-0c83-4969-8919-bf7063c6755a",
@@ -9108,7 +9292,7 @@
       "is_sample": true,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "f5e5dabc-14ef-44da-a225-9d269a84931c",
@@ -9200,7 +9384,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "f5e5dabc-14ef-44da-a225-9d269a84931c",
@@ -9246,7 +9430,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "f5e5dabc-14ef-44da-a225-9d269a84931c",
@@ -9798,7 +9982,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "bff53cd5-8af3-49f0-9199-aca01c338e78",
@@ -9844,7 +10028,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "bff53cd5-8af3-49f0-9199-aca01c338e78",
@@ -9890,7 +10074,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "bff53cd5-8af3-49f0-9199-aca01c338e78",
@@ -9936,7 +10120,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "bff53cd5-8af3-49f0-9199-aca01c338e78",
@@ -10258,7 +10442,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "79a75ee2-230b-4b96-97fd-c90cfa9570a8",
@@ -10304,7 +10488,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "79a75ee2-230b-4b96-97fd-c90cfa9570a8",
@@ -10350,7 +10534,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "79a75ee2-230b-4b96-97fd-c90cfa9570a8",
@@ -10810,7 +10994,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "0392b56a-bd05-4a94-8a5c-c4ff0c0e6f07",
@@ -10856,7 +11040,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "0392b56a-bd05-4a94-8a5c-c4ff0c0e6f07",
@@ -11316,7 +11500,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "3a23b357-5a30-47ff-b89c-e3f624d32dce",
@@ -11822,7 +12006,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "386a5612-c6ba-40dc-80e9-0b94913f8b8a",
@@ -11868,7 +12052,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "386a5612-c6ba-40dc-80e9-0b94913f8b8a",
@@ -11914,7 +12098,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "386a5612-c6ba-40dc-80e9-0b94913f8b8a",
@@ -12098,7 +12282,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "31f82f16-3501-438d-b81f-462be82a4751",
@@ -12420,7 +12604,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "09bbee2f-9279-4b0e-a395-17bbfd8e8918",
@@ -12466,7 +12650,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "09bbee2f-9279-4b0e-a395-17bbfd8e8918",
@@ -12512,7 +12696,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "09bbee2f-9279-4b0e-a395-17bbfd8e8918",
@@ -13202,7 +13386,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "cb9193db-d0f1-41e1-b496-5cb060155c1f",
@@ -13248,7 +13432,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "cb9193db-d0f1-41e1-b496-5cb060155c1f",
@@ -13616,7 +13800,7 @@
       "is_sample": false,
       "notes": "Syrups - base price $12.50 - (Regular + Zero Sugar)\nZero Sugar AM and PM price - $15.00 \nTopicals 1000:1000 - $35.00\nTopicals 500:500 - $17.50",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "1050341e-20a7-4793-bab8-061a19fdf7dd",
@@ -13662,7 +13846,7 @@
       "is_sample": false,
       "notes": "Syrups - base price $12.50 - (Regular + Zero Sugar)\nZero Sugar AM and PM price - $15.00 \nTopicals 1000:1000 - $35.00\nTopicals 500:500 - $17.50",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "1050341e-20a7-4793-bab8-061a19fdf7dd",
@@ -13708,7 +13892,7 @@
       "is_sample": false,
       "notes": "Syrups - base price $12.50 - (Regular + Zero Sugar)\nZero Sugar AM and PM price - $15.00 \nTopicals 1000:1000 - $35.00\nTopicals 500:500 - $17.50",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "1050341e-20a7-4793-bab8-061a19fdf7dd",
@@ -13754,7 +13938,7 @@
       "is_sample": false,
       "notes": "Syrups - base price $12.50 - (Regular + Zero Sugar)\nZero Sugar AM and PM price - $15.00 \nTopicals 1000:1000 - $35.00\nTopicals 500:500 - $17.50",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "1050341e-20a7-4793-bab8-061a19fdf7dd",
@@ -14490,7 +14674,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "3be7956d-35fc-4172-a7f3-5d9c70adf734",
@@ -14536,7 +14720,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "3be7956d-35fc-4172-a7f3-5d9c70adf734",
@@ -14858,7 +15042,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "3be7956d-35fc-4172-a7f3-5d9c70adf734",
@@ -14996,7 +15180,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "55a851d3-6b62-41db-8e51-f595a4d90c74",
@@ -15042,7 +15226,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "55a851d3-6b62-41db-8e51-f595a4d90c74",
@@ -15088,7 +15272,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "55a851d3-6b62-41db-8e51-f595a4d90c74",
@@ -15134,7 +15318,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "55a851d3-6b62-41db-8e51-f595a4d90c74",
@@ -15548,7 +15732,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "55a851d3-6b62-41db-8e51-f595a4d90c74",
@@ -15686,7 +15870,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "52b1a9eb-0ed9-4c50-b3a6-cd6b5e89cd2d",
@@ -15732,7 +15916,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "52b1a9eb-0ed9-4c50-b3a6-cd6b5e89cd2d",
@@ -15778,7 +15962,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "52b1a9eb-0ed9-4c50-b3a6-cd6b5e89cd2d",
@@ -15824,7 +16008,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "52b1a9eb-0ed9-4c50-b3a6-cd6b5e89cd2d",
@@ -16238,7 +16422,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "52b1a9eb-0ed9-4c50-b3a6-cd6b5e89cd2d",
@@ -16422,7 +16606,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "c454e146-5231-4bcc-a2be-7ee76f5a604a",
@@ -16836,7 +17020,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "c454e146-5231-4bcc-a2be-7ee76f5a604a",
@@ -16882,7 +17066,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "c454e146-5231-4bcc-a2be-7ee76f5a604a",
@@ -16974,7 +17158,7 @@
       "is_sample": true,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "c454e146-5231-4bcc-a2be-7ee76f5a604a",
@@ -17434,7 +17618,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "a3ba2541-2c2a-42de-a9d5-d8a6c439d4d1",
@@ -17480,7 +17664,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "a3ba2541-2c2a-42de-a9d5-d8a6c439d4d1",
@@ -17526,7 +17710,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "a3ba2541-2c2a-42de-a9d5-d8a6c439d4d1",
@@ -17572,7 +17756,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "a3ba2541-2c2a-42de-a9d5-d8a6c439d4d1",
@@ -18032,7 +18216,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "49f1a5e48e1b96a679e6",
-      "current_inventory": 282.0
+      "current_inventory": 267.0
     },
     {
       "order_id": "200920c2-6be9-403e-8b5b-33ade59768ed",
@@ -18078,7 +18262,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4d5c9b1162b6431d6c6c",
-      "current_inventory": 40.0
+      "current_inventory": 25.0
     },
     {
       "order_id": "200920c2-6be9-403e-8b5b-33ade59768ed",
@@ -18124,7 +18308,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4e3596d2a7ab898be2a3",
-      "current_inventory": 369.0
+      "current_inventory": 354.0
     },
     {
       "order_id": "200920c2-6be9-403e-8b5b-33ade59768ed",
@@ -18170,7 +18354,7 @@
       "is_sample": false,
       "notes": "",
       "product_sku": "4434adc7323607418729",
-      "current_inventory": 105.0
+      "current_inventory": 90.0
     },
     {
       "order_id": "200920c2-6be9-403e-8b5b-33ade59768ed",
