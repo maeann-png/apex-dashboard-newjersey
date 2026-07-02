@@ -9,6 +9,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+<!-- Libraries served from this repo root (no external CDN, no subfolder). -->
+<script src="react.production.min.js"></script>
+<script src="react-dom.production.min.js"></script>
+<script src="prop-types.min.js"></script>
+<script src="Recharts.js"></script>
+
 <style>
   :root {
     /* Chill Medicated · Purple Gradient palette (New Jersey market)
@@ -354,11 +360,6 @@
     .grid-2, .grid-3, .grid-half { grid-template-columns: 1fr; }
   }
 </style>
-<!-- Libraries served from this repo root (no external CDN). -->
-<script src="react.production.min.js"></script>
-<script src="react-dom.production.min.js"></script>
-<script src="prop-types.min.js"></script>
-<script src="Recharts.js"></script>
 </head>
 <body>
 <div id="root"></div>
@@ -467,6 +468,97 @@ const fmtMoneyFull = n => '$' + (n || 0).toLocaleString(undefined, {
   maximumFractionDigits: 2
 });
 const fmtNum = n => (n || 0).toLocaleString();
+/* ---- Downloadable sales report (always reflects the current dashboard filters) ---- */
+const __esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const __m2 = n => '$' + (n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const __i0 = n => Math.round(n || 0).toLocaleString();
+const __MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const __ymLabel = ym => __MON[parseInt(ym.slice(5, 7), 10) - 1] + " '" + ym.slice(2, 4);
+const __activeFilters = f => {
+  f = f || {};
+  const parts = [];
+  if (f.from || f.to) parts.push('Dates ' + (f.from || 'start') + ' to ' + (f.to || 'latest'));
+  if (f.product) parts.push('Search "' + f.product + '"');
+  if (f.productLine) parts.push('Line ' + f.productLine);
+  if (f.status) parts.push('Payment ' + f.status);
+  if (f.rep) parts.push('Rep ' + f.rep);
+  if (f.buyer) parts.push('Buyer ' + f.buyer);
+  if (f.invoice) parts.push('Invoice ' + f.invoice);
+  if (f.excludeSamples) parts.push('Samples excluded');
+  return parts.length ? parts.join('  \u00b7  ') : 'All data (no filters applied)';
+};
+const __summaryTable = rows => {
+  let net = 0, disc = 0, units = 0; const orders = {}, prods = {};
+  rows.forEach(r => { net += r._revenue || 0; disc += r._lineDiscount || 0; units += r._quantity || 0; if (r.order_id) orders[r.order_id] = 1; if (r.product_name) prods[r.product_name] = 1; });
+  const body = [['Gross sales', __m2(net + disc)], ['Discounts', __m2(disc)], ['Net sales', __m2(net)], ['Units sold', __i0(units)], ['Orders', __i0(Object.keys(orders).length)], ['Products', __i0(Object.keys(prods).length)]]
+    .map(r => '<tr><td>' + __esc(r[0]) + '</td><td>' + __esc(r[1]) + '</td></tr>').join('');
+  return '<table border="1"><thead><tr><th>Summary</th><th>Value</th></tr></thead><tbody>' + body + '</tbody></table>';
+};
+const __breakdownTable = rows => {
+  const map = {};
+  rows.forEach(r => {
+    const k = r.product_name || '(unnamed)';
+    if (!map[k]) map[k] = { name: k, line: r.product_type || '', units: 0, net: 0, disc: 0 };
+    map[k].units += r._quantity || 0; map[k].net += r._revenue || 0; map[k].disc += r._lineDiscount || 0;
+  });
+  const arr = Object.keys(map).map(k => map[k]).sort((a, b) => (b.net + b.disc) - (a.net + a.disc));
+  const head = '<tr><th>Product</th><th>Line</th><th>Units</th><th>Gross</th><th>Discounts</th><th>Net</th><th>Avg Unit $</th></tr>';
+  const body = arr.map(p => '<tr><td>' + __esc(p.name) + '</td><td>' + __esc(p.line) + '</td><td>' + __i0(p.units) + '</td><td>' + __m2(p.net + p.disc) + '</td><td>' + __m2(p.disc) + '</td><td>' + __m2(p.net) + '</td><td>' + __m2(p.units ? p.net / p.units : 0) + '</td></tr>').join('');
+  return '<table border="1"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
+};
+const __pivotTable = rows => {
+  const prods = {}, mset = {};
+  rows.forEach(r => {
+    if (!r._date) return;
+    const ym = r._date.getFullYear() + '-' + String(r._date.getMonth() + 1).padStart(2, '0');
+    mset[ym] = 1;
+    const k = r.product_name || '(unnamed)';
+    if (!prods[k]) prods[k] = { name: k, cells: {}, total: 0 };
+    const g = (r._revenue || 0) + (r._lineDiscount || 0);
+    prods[k].cells[ym] = (prods[k].cells[ym] || 0) + g;
+    prods[k].total += g;
+  });
+  const months = Object.keys(mset).sort();
+  const list = Object.keys(prods).map(k => prods[k]).sort((a, b) => b.total - a.total).slice(0, 100);
+  const colT = {}; let grand = 0;
+  months.forEach(m => { let s = 0; list.forEach(p => { s += p.cells[m] || 0; }); colT[m] = s; grand += s; });
+  const head = '<tr><th>SKU / Product</th>' + months.map(m => '<th>' + __esc(__ymLabel(m)) + '</th>').join('') + '<th>Total</th></tr>';
+  const body = list.map(p => '<tr><td>' + __esc(p.name) + '</td>' + months.map(m => '<td>' + (p.cells[m] ? __m2(p.cells[m]) : '') + '</td>').join('') + '<td>' + __m2(p.total) + '</td></tr>').join('');
+  const tot = '<tr><td>All products</td>' + months.map(m => '<td>' + __m2(colT[m]) + '</td>').join('') + '<td>' + __m2(grand) + '</td></tr>';
+  return '<table border="1"><thead>' + head + '</thead><tbody>' + body + tot + '</tbody></table>';
+};
+const __RTITLE = 'Chill Medicated NJ \u2014 Sales Report';
+const __rMeta = f => 'Filters: ' + __activeFilters(f) + '  \u00b7  Gross = before discounts  \u00b7  Generated ' + new Date().toLocaleString();
+const __dl = (filename, blob) => {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+};
+const downloadReportExcel = (rows, filters) => {
+  if (!rows || !rows.length) { alert('No rows match the current filters, so there is nothing to download.'); return; }
+  const html = '<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"></head><body>'
+    + '<table><tr><td><b>' + __esc(__RTITLE) + '</b></td></tr><tr><td>' + __esc(__rMeta(filters)) + '</td></tr></table>'
+    + '<br><b>Summary</b>' + __summaryTable(rows)
+    + '<br><b>Product breakdown</b>' + __breakdownTable(rows)
+    + '<br><b>Monthly gross by SKU</b>' + __pivotTable(rows)
+    + '</body></html>';
+  __dl('Chill_MA_Sales_Report.xls', new Blob([html], { type: 'application/vnd.ms-excel' }));
+};
+const downloadReportPDF = (rows, filters) => {
+  if (!rows || !rows.length) { alert('No rows match the current filters, so there is nothing to download.'); return; }
+  const css = 'body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:24px}h1{font-size:16px;margin:0 0 4px}h2{font-size:12px;margin:18px 0 6px;border-bottom:1px solid #ccc;padding-bottom:2px}.m{font-size:11px;color:#555;margin-bottom:8px}table{border-collapse:collapse;width:100%;font-size:10px;margin-bottom:6px}th,td{border:1px solid #ccc;padding:3px 6px;text-align:right}th:first-child,td:first-child{text-align:left}thead th{background:#eee}@media print{body{padding:0}h2{page-break-after:avoid}}';
+  const w = window.open('', '_blank');
+  if (!w) { alert('Please allow pop-ups so the PDF report can open, then use Save as PDF.'); return; }
+  w.document.write('<html><head><meta charset="utf-8"><title>' + __esc(__RTITLE) + '</title><style>' + css + '</style></head><body>'
+    + '<h1>' + __esc(__RTITLE) + '</h1><div class="m">' + __esc(__rMeta(filters)) + '</div>'
+    + '<h2>Summary</h2>' + __summaryTable(rows)
+    + '<h2>Product breakdown</h2>' + __breakdownTable(rows)
+    + '<h2>Monthly gross by SKU</h2>' + __pivotTable(rows)
+    + '<scr' + 'ipt>window.onload=function(){setTimeout(function(){window.print();},300);};</scr' + 'ipt>'
+    + '</body></html>');
+  w.document.close();
+};
 const parseDate = str => {
   if (!str) return null;
   const s = String(str).trim();
@@ -483,17 +575,6 @@ const parseDate = str => {
   const d = new Date(s);
   return isNaN(d) ? null : d;
 };
-
-// Display format: MM/DD/YY (two-digit year, no time stamp).
-// Accepts any of the messy input shapes the scraper produces.
-const fmtDate = str => {
-  const d = parseDate(str);
-  if (!d) return '—';
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  const y = String(d.getFullYear()).slice(-2);
-  return `${m}/${day}/${y}`;
-};
 const ymd = d => {
   if (!(d instanceof Date) || isNaN(d)) return '';
   const y = d.getFullYear();
@@ -502,7 +583,7 @@ const ymd = d => {
   return `${y}-${m}-${day}`;
 };
 
-// US state normalization — handles "MA" / "Massachusetts" / "Mass." / "massachusetts" → "MA"
+// US state normalization — handles "MA" / "New Jersey" / "Mass." / "massachusetts" → "MA"
 const STATE_TO_ABBR = {
   'alabama': 'AL',
   'alaska': 'AK',
@@ -572,6 +653,206 @@ const normalizeState = raw => {
 };
 
 // --- Main App ---------------------------------------------------------------
+
+// ── Revenue Over Time: Month (year-over-year) / Year toggle ──────────────
+function RevenueOverTime({ rows }) {
+  const e = React.createElement;
+  const [view, setView] = React.useState('month');
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const YEAR_COLORS = ['#d24a92','#ffb454','#a6e22e','#f95f8f','#c792ea','#ff6e6e','#7bdff2','#fcd34d'];
+
+  const years = React.useMemo(() => {
+    const s = new Set();
+    rows.forEach(r => { if (r._date) s.add(r._date.getFullYear()); });
+    return [...s].sort((a, b) => a - b);
+  }, [rows]);
+
+  // Month view: one entry per month, a separate revenue key per year.
+  const monthData = React.useMemo(() => {
+    const base = MONTHS.map(m => ({ month: m }));
+    rows.forEach(r => {
+      if (!r._date) return;
+      const y = r._date.getFullYear();
+      const row = base[r._date.getMonth()];
+      row[y] = (row[y] || 0) + r._revenue;
+    });
+    return base;
+  }, [rows, years]);
+
+  // Year view: one entry per year (annual totals).
+  const yearData = React.useMemo(() => {
+    const map = {};
+    rows.forEach(r => { if (r._date) { const y = r._date.getFullYear(); map[y] = (map[y] || 0) + r._revenue; } });
+    return years.map(y => ({ year: String(y), revenue: map[y] || 0 }));
+  }, [rows, years]);
+
+  const colorFor = y => YEAR_COLORS[years.indexOf(y) % YEAR_COLORS.length];
+  const axisTick = { fontSize: 11, fontFamily: 'JetBrains Mono' };
+  const tooltip = fmt => e(Tooltip, {
+    contentStyle: { background: '#161a17', border: '1px solid #262c28', borderRadius: 4, fontSize: 12 },
+    labelStyle: { color: '#9aa39c', fontFamily: 'JetBrains Mono', fontSize: 11 },
+    itemStyle: { color: '#e8ebe7' }, formatter: fmt
+  });
+
+  const btn = (id, label) => e('button', {
+    key: id, onClick: () => setView(id),
+    style: {
+      padding: '4px 12px', fontSize: 11, fontFamily: 'JetBrains Mono', cursor: 'pointer', borderRadius: 4,
+      border: '1px solid ' + (view === id ? '#d24a92' : '#262c28'),
+      background: view === id ? 'rgba(210,74,146,0.12)' : '#161a17',
+      color: view === id ? '#d24a92' : '#9aa39c'
+    }
+  }, label);
+
+  const chart = view === 'month'
+    ? e(LineChart, { data: monthData, margin: { top: 12, right: 12, left: 0, bottom: 0 } },
+        e(CartesianGrid, { stroke: '#262c28', strokeDasharray: '2 2', vertical: false }),
+        e(XAxis, { dataKey: 'month', stroke: '#5d6660', tick: axisTick, tickLine: false, axisLine: { stroke: '#262c28' } }),
+        e(YAxis, { stroke: '#5d6660', tick: axisTick, tickLine: false, axisLine: false, tickFormatter: fmtMoney }),
+        tooltip((v, n) => [fmtMoneyFull(v), n]),
+        e(Legend, { wrapperStyle: { fontSize: 11, fontFamily: 'JetBrains Mono' } }),
+        ...years.map(y => e(Line, {
+          key: y, type: 'monotone', dataKey: String(y), name: String(y),
+          stroke: colorFor(y), strokeWidth: 2, dot: { r: 2 }, activeDot: { r: 4 }, connectNulls: false
+        }))
+      )
+    : e(LineChart, { data: yearData, margin: { top: 12, right: 12, left: 0, bottom: 0 } },
+        e(CartesianGrid, { stroke: '#262c28', strokeDasharray: '2 2', vertical: false }),
+        e(XAxis, { dataKey: 'year', stroke: '#5d6660', tick: axisTick, tickLine: false, axisLine: { stroke: '#262c28' } }),
+        e(YAxis, { stroke: '#5d6660', tick: axisTick, tickLine: false, axisLine: false, tickFormatter: fmtMoney }),
+        tooltip(v => [fmtMoneyFull(v), 'Revenue']),
+        e(Line, { type: 'monotone', dataKey: 'revenue', name: 'Revenue', stroke: '#d24a92', strokeWidth: 2, dot: { r: 3 }, activeDot: { r: 5 } })
+      );
+
+  const meta = view === 'month'
+    ? years.length + ' year' + (years.length === 1 ? '' : 's') + ' compared'
+    : yearData.length + ' year' + (yearData.length === 1 ? '' : 's');
+
+  return e('section', { className: 'section' },
+    e('div', { className: 'section-header' },
+      e('h2', { className: 'section-title' }, 'Revenue ', e('em', null, 'over time')),
+      e('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },
+        e('div', { style: { display: 'flex', gap: 6 } }, btn('month', 'Month'), btn('year', 'Year')),
+        e('span', { className: 'section-meta' }, meta)
+      )
+    ),
+    e('div', { className: 'card', style: { height: 320 } },
+      e(ResponsiveContainer, { width: '100%', height: '100%' }, chart)
+    )
+  );
+}
+
+// ── Paginated inventory table with per-product value ──────────────────
+function InventoryTable({ list }) {
+  const e = React.createElement;
+  const PAGE = 25;
+  const [page, setPage] = React.useState(0);
+  const pages = Math.max(1, Math.ceil(list.length / PAGE));
+  const cur = Math.min(page, pages - 1);
+  const slice = list.slice(cur * PAGE, cur * PAGE + PAGE);
+  const badge = (color, border, text) => e("span", { style: { fontFamily: "JetBrains Mono", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color, border: "1px solid " + border, borderRadius: 2, padding: "2px 6px", whiteSpace: "nowrap" } }, text);
+  const rows = slice.map((p, i) => e("tr", { key: cur * PAGE + i },
+    e("td", null, p.name),
+    e("td", { className: "dim" }, p.line),
+    e("td", { className: "dim font-mono", style: { fontSize: 11 } }, p.sku || "\u2014"),
+    e("td", { className: "num dim" }, fmtNum(Math.round(p.sold))),
+    e("td", { className: "num" }, e("strong", { style: { color: p.qty == null ? "var(--text-faint)" : p.qty <= 0 ? "var(--rose)" : "var(--accent)" } }, p.qty == null ? "\u2014" : fmtNum(Math.round(p.qty)))),
+    e("td", { className: "num dim" }, p.value ? fmtMoney(p.value) : "\u2014"),
+    e("td", { className: "num dim" }, p.batches || "\u2014"),
+    e("td", null, !p.listed ? badge("var(--text-faint)", "var(--border)", "Unlisted") : p.neverSold ? badge("var(--warm)", "var(--warm)", "Never sold") : e("span", { style: { color: "var(--text-faint)" } }, "\u2014"))
+  ));
+  const navBtn = (label, disabled, onClick) => e("button", { className: "date-preset", disabled, onClick, style: { opacity: disabled ? 0.35 : 1, cursor: disabled ? "default" : "pointer" } }, label);
+  const pager = e("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderTop: "1px solid var(--border)", fontFamily: "JetBrains Mono", fontSize: 11, color: "var(--text-dim)" } },
+    e("span", null, fmtNum(list.length) + " products \u00b7 page " + (cur + 1) + " of " + pages),
+    e("div", { style: { display: "flex", gap: 8 } },
+      navBtn("\u2039 Prev", cur <= 0, () => setPage(cur - 1)),
+      navBtn("Next \u203a", cur >= pages - 1, () => setPage(cur + 1))));
+  return e("div", { className: "card", style: { padding: 0, overflow: "hidden" } },
+    e("div", { style: { overflowX: "auto" } },
+      e("table", { className: "data-table" },
+        e("thead", null, e("tr", null,
+          e("th", null, "Product"), e("th", null, "Line"), e("th", null, "SKU"),
+          e("th", { className: "num" }, "Units Sold"),
+          e("th", { className: "num" }, "On Hand"),
+          e("th", { className: "num" }, "Value"),
+          e("th", { className: "num" }, "Batches"),
+          e("th", null, "Status"))),
+        e("tbody", null, rows))),
+    pager);
+}
+
+function MonthlyGrossBySku({ rows }) {
+  const e = React.createElement;
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const [yr, setYr] = React.useState('all');
+  const [mo, setMo] = React.useState('all');
+  const base = React.useMemo(() => {
+    const monthsSet = new Set();
+    const prods = {};
+    rows.forEach(r => {
+      if (!r._date) return;
+      const ym = r._date.getFullYear() + '-' + String(r._date.getMonth() + 1).padStart(2, '0');
+      monthsSet.add(ym);
+      const key = r.product_name || '(unnamed)';
+      if (!prods[key]) prods[key] = { name: key, cells: {} };
+      const gross = (r._revenue || 0) + (r._lineDiscount || 0);
+      prods[key].cells[ym] = (prods[key].cells[ym] || 0) + gross;
+    });
+    const allMonths = Array.from(monthsSet).sort();
+    const years = Array.from(new Set(allMonths.map(m => m.split('-')[0]))).sort();
+    return { allMonths: allMonths, prods: Object.values(prods), years: years };
+  }, [rows]);
+  const view = React.useMemo(() => {
+    const months = base.allMonths.filter(ym => {
+      const p = ym.split('-');
+      if (yr !== 'all' && p[0] !== yr) return false;
+      if (mo !== 'all' && p[1] !== mo) return false;
+      return true;
+    });
+    const list = base.prods.map(p => {
+      let total = 0;
+      months.forEach(ym => { total += p.cells[ym] || 0; });
+      return { name: p.name, cells: p.cells, total: total };
+    }).filter(p => p.total !== 0).sort((a, b) => b.total - a.total);
+    const colTotals = {}; let grand = 0;
+    months.forEach(ym => { colTotals[ym] = list.reduce((s, p) => s + (p.cells[ym] || 0), 0); grand += colTotals[ym]; });
+    return { months: months, list: list, colTotals: colTotals, grand: grand };
+  }, [base, yr, mo]);
+  const months = view.months, list = view.list, colTotals = view.colTotals, grand = view.grand;
+  const stick = { position: 'sticky', left: 0, background: 'var(--bg-elev)', zIndex: 1 };
+  const mlabel = ym => { const p = ym.split('-'); return MONTHS[parseInt(p[1], 10) - 1] + " '" + p[0].slice(2); };
+  const cell = v => v ? fmtMoney(v) : e("span", { className: "dim" }, "\u2014");
+  const sel = (val, set, opts) => e("select", { className: "filter-select", value: val, onChange: ev => set(ev.target.value), style: { minWidth: 88, height: 30 } },
+    opts.map(o => e("option", { key: o.v, value: o.v }, o.l)));
+  return e("section", { className: "section" },
+    e("div", { className: "section-header" },
+      e("h2", { className: "section-title" }, "Monthly gross sales ", e("em", null, "by SKU")),
+      e("div", { style: { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' } },
+        sel(yr, setYr, [{ v: 'all', l: 'All years' }].concat(base.years.map(y => ({ v: y, l: y })))),
+        sel(mo, setMo, [{ v: 'all', l: 'All months' }].concat(MONTHS.map((m, i) => ({ v: String(i + 1).padStart(2, '0'), l: m })))),
+        e("span", { className: "section-meta" }, months.length ? fmtNum(list.length) + " products \u00b7 " + months.length + " mo \u00b7 gross" : ""))),
+    months.length === 0
+      ? e("div", { className: "card" }, e("div", { style: { color: 'var(--text-faint)', fontSize: 13 } }, "No rows match the current filters."))
+      : e("div", { className: "card", style: { padding: 0, overflow: 'hidden' } },
+          e("div", { style: { overflowX: 'auto', maxHeight: 520 } },
+            e("table", { className: "data-table" },
+              e("thead", null,
+                e("tr", null,
+                  e("th", { style: Object.assign({}, stick, { zIndex: 2 }) }, "SKU / Product"),
+                  months.map(ym => e("th", { key: ym, className: "num" }, mlabel(ym))),
+                  e("th", { className: "num" }, "Total"))),
+              e("tbody", null,
+                list.slice(0, 100).map((p, i) => e("tr", { key: i },
+                  e("td", { style: stick }, p.name),
+                  months.map(ym => e("td", { key: ym, className: "num" }, cell(p.cells[ym]))),
+                  e("td", { className: "num" }, e("strong", null, fmtMoney(p.total))))),
+                e("tr", { style: { background: 'var(--bg)' } },
+                  e("td", { style: Object.assign({}, stick, { background: 'var(--bg)', fontWeight: 700 }) }, "All products"),
+                  months.map(ym => e("td", { key: ym, className: "num" }, e("strong", null, fmtMoney(colTotals[ym])))),
+                  e("td", { className: "num" }, e("strong", null, fmtMoney(grand))))))),
+          list.length > 100 ? e("div", { style: { padding: '8px 14px', color: 'var(--text-faint)', fontSize: 12 } }, "Showing top 100 of " + fmtNum(list.length) + " products by total gross") : null));
+}
+
 function App() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -585,15 +866,26 @@ function App() {
     status: '',
     invoice: '',
     productLine: '',
+    product: '',
     excludeSamples: false,
     cogsRatio: 0.45
   });
   useEffect(() => {
     const load = () => {
-      fetch('sales_data.json?t=' + Date.now()).then(r => {
-        if (!r.ok) throw new Error('Could not load sales_data.json');
-        return r.json();
-      }).then(setData).catch(e => setError(e.message));
+      Promise.all([
+        fetch('sales_data.json?t=' + Date.now()).then(r => {
+          if (!r.ok) throw new Error('Could not load sales_data.json');
+          return r.json();
+        }),
+        // Historical backfill (2024 LeafLink). Optional: if the file is missing
+        // or fails to parse, fall back to live-only instead of breaking.
+        fetch('historical_data.json?t=' + Date.now())
+          .then(r => r.ok ? r.json() : { rows: [] })
+          .catch(() => ({ rows: [] }))
+      ]).then(([live, hist]) => {
+        const histRows = Array.isArray(hist) ? hist : (hist.rows || []);
+        setData({ ...live, rows: [...histRows, ...(live.rows || [])] });
+      }).catch(e => setError(e.message));
     };
     load();
     const id = setInterval(load, 60000); // refresh every minute
@@ -673,7 +965,11 @@ function Dashboard({
     _delivery: parseDate(r.delivery_date_raw || r.delivery_date),
     _revenue: typeof r.line_total_raw === 'number' ? r.line_total_raw / 100 : parseMoney(r.line_total || r.computed_sale_price || r.total),
     _cost: parseMoney(r.batch_cost_of_goods),
-    _quantity: parseFloat(r.quantity_raw != null ? r.quantity_raw : r.quantity) || 0,
+    // Physical units sold. Apex's order_quantity (a.k.a. quantity) is in the
+    // order's unit of measure — "Case" for ~380 lines — so it mixes cases and
+    // eaches. inventory_quantity is the Total Unit Quantity (always "Unit"), the
+    // true physical-units measure, so we use it and fall back only if absent.
+    _quantity: parseFloat(r.inventory_quantity != null ? r.inventory_quantity : r.quantity_raw != null ? r.quantity_raw : r.quantity) || 0,
     // DISCOUNT FIELD — using `discounts` (per-line) only. Apex also has
     // `additional_discounts` (invoice-level), but it's not consistently reflected
     // in the Apex UI, so we don't trust it as real discount activity. Line-level
@@ -712,10 +1008,13 @@ function Dashboard({
       if (filters.from && rowYmd < filters.from) return false;
       if (filters.to && rowYmd > filters.to) return false;
     }
-    if (filters.brand && r.brand !== filters.brand) return false;
     if (filters.buyer && r.buyer_name !== filters.buyer) return false;
     if (filters.rep && r.sales_rep !== filters.rep) return false;
-    if (filters.state && r.buyer_state !== filters.state) return false;
+    if (filters.product) {
+      const hay = [r.product_name, r.product_type, r.product_sku].map(x => String(x || '').toLowerCase()).join(' ');
+      const terms = filters.product.toLowerCase().split(/\s+/).filter(Boolean);
+      if (!terms.every(t => hay.includes(t))) return false;
+    }
     if (filters.status && r.payment_status !== filters.status) return false;
     if (filters.productLine && r.product_type !== filters.productLine) return false;
     if (filters.excludeSamples && r._isSample) return false;
@@ -774,13 +1073,9 @@ function Dashboard({
     const monthKeys = Object.keys(byMonth).sort();
     let momChange = null;
     let momLabel = '—';
-    let momLatestAmount = null;
-    let momPrevAmount = null;
     if (monthKeys.length >= 2) {
       const latest = byMonth[monthKeys[monthKeys.length - 1]];
       const prev = byMonth[monthKeys[monthKeys.length - 2]];
-      momLatestAmount = latest;
-      momPrevAmount = prev;
       if (prev) {
         momChange = (latest - prev) / prev * 100;
         momLabel = monthKeys[monthKeys.length - 1] + ' vs ' + monthKeys[monthKeys.length - 2];
@@ -802,8 +1097,6 @@ function Dashboard({
       avgUnitPrice,
       momChange,
       momLabel,
-      momLatestAmount,
-      momPrevAmount,
       discounts,
       credits,
       creditCount,
@@ -906,7 +1199,7 @@ function Dashboard({
   const topProducts = useMemo(() => groupSum('product_name'), [filtered]);
   const topBuyers = useMemo(() => groupSum('buyer_name'), [filtered]);
   const byRep = useMemo(() => groupSum('sales_rep', 20), [filtered]);
-  const byCategory = useMemo(() => groupSum('product_type'), [filtered]);
+  const byCategory = useMemo(() => groupSum('product_category'), [filtered]);
   const byState = useMemo(() => groupSum('buyer_state', 15), [filtered]);
 
   // Per-product breakdown (matches the Apex product-line spreadsheet)
@@ -967,13 +1260,13 @@ function Dashboard({
         map[id] = {
           id,
           invoice: r.order_number || '#' + r.order_id,
-          date: fmtDate(r._date || r.order_date_raw || r.order_date),
+          date: r.order_date || '—',
           _date: r._date,
           buyer: r.buyer_name || '—',
           rep: r.sales_rep || '—',
           state: r.buyer_state || '—',
           status: r.payment_status || 'Unknown',
-          delivery: fmtDate(r.delivery_date_raw || r.delivery_date),
+          delivery: r.delivery_date || '—',
           lineItems: 0,
           units: 0,
           revenue: 0,
@@ -1005,44 +1298,50 @@ function Dashboard({
     }));
   }, [filtered]);
 
-  // Current inventory — from the scraped LeafLink catalog (data.inventory),
-  // filtered upstream to Available-listed products so it matches the export and
-  // auto-updates each run. Built from the unfiltered snapshot (ignores date/buyer
-  // filters by design — current stock is current stock). Sold totals join by sku,
-  // then name, using physical units (_quantity).
+  // Current inventory — from Apex's inventory endpoint (data.inventory), pulled
+  // by the scraper and filtered to Chill Medicated. Built from the unfiltered
+  // snapshot (current stock ignores the date/buyer filters by design). Sold
+  // totals join by sku, then name, using physical units (inventory_quantity).
   const inventory = useMemo(() => {
     const soldBySku = {},
-      soldByName = {};
+      soldByName = {},
+      revBySku = {},
+      revByName = {};
     normalized.forEach(r => {
-      const u = r._quantity || 0;
-      if (r.product_sku) soldBySku[r.product_sku] = (soldBySku[r.product_sku] || 0) + u;
-      if (r.product_name) soldByName[r.product_name] = (soldByName[r.product_name] || 0) + u;
+      const u = parseFloat(r.inventory_quantity) || r._quantity || 0;
+      const rev = r._revenue || 0;
+      if (r.product_sku) { soldBySku[r.product_sku] = (soldBySku[r.product_sku] || 0) + u; revBySku[r.product_sku] = (revBySku[r.product_sku] || 0) + rev; }
+      if (r.product_name) { soldByName[r.product_name] = (soldByName[r.product_name] || 0) + u; revByName[r.product_name] = (revByName[r.product_name] || 0) + rev; }
     });
     const cat = Array.isArray(data.inventory) ? data.inventory : [];
     const list = cat.map(p => {
       const sold = p.sku && soldBySku[p.sku] != null ? soldBySku[p.sku] : soldByName[p.name] || 0;
+      const revT = p.sku && revBySku[p.sku] != null ? revBySku[p.sku] : revByName[p.name] || 0;
+      const unitPrice = sold > 0 ? revT / sold : 0;
+      const qty = p.qty != null ? p.qty : null;
       return {
         name: p.name || '—',
         line: p.line || '—',
         sku: p.sku || '',
-        qty: p.inventory != null ? p.inventory : null,
-        reserved: p.reserved != null ? p.reserved : null,
-        inv: p.available != null ? p.available : null,
-        status: p.status || '',
+        qty,
+        batches: p.batches || 0,
+        listed: !!p.listed,
         sold,
-        neverSold: sold <= 0
+        neverSold: sold <= 0,
+        unitPrice,
+        value: qty != null ? qty * unitPrice : 0
       };
-    }).sort((a, b) => (b.inv || 0) - (a.inv || 0));
-    const withInv = list.filter(p => p.inv != null);
-    const availableTotal = withInv.reduce((s, p) => s + p.inv, 0);
-    const reservedTotal = list.reduce((s, p) => s + (p.reserved || 0), 0);
-    const onHandTotal = list.reduce((s, p) => s + (p.qty || 0), 0);
-    const out = withInv.filter(p => p.inv <= 0).length;
+    }).sort((a, b) => (b.qty || 0) - (a.qty || 0));
+    const withQty = list.filter(p => p.qty != null);
+    const onHandTotal = withQty.reduce((s, p) => s + p.qty, 0);
+    const listedN = list.filter(p => p.listed).length;
+    const out = withQty.filter(p => p.qty <= 0).length;
+    const onHandValue = list.reduce((s, p) => s + (p.value || 0), 0);
     return {
       list,
-      availableTotal,
-      reservedTotal,
       onHandTotal,
+      onHandValue,
+      listedN,
       skus: list.length,
       out
     };
@@ -1057,6 +1356,7 @@ function Dashboard({
     status: '',
     invoice: '',
     productLine: '',
+    product: '',
     excludeSamples: false,
     cogsRatio: 0.45
   });
@@ -1091,7 +1391,7 @@ function Dashboard({
         discountByInvoice.set(id, {
           invoice: r.order_number || id,
           buyer: r.buyer_name || '—',
-          date: fmtDate(r._date || r.order_date_raw || r.order_date),
+          date: r.order_date || '—',
           line: 0
         });
       }
@@ -1261,7 +1561,8 @@ function Dashboard({
     filters: filters,
     setFilters: setFilters,
     distinct: distinct,
-    onReset: resetFilters
+    onReset: resetFilters,
+    rows: filtered
   }), /*#__PURE__*/React.createElement("div", {
     className: "kpi-grid"
   }, /*#__PURE__*/React.createElement(Kpi, {
@@ -1309,91 +1610,7 @@ function Dashboard({
     label: "Credits Applied",
     value: fmtMoney(kpis.credits),
     sub: kpis.creditCount ? `${fmtNum(kpis.creditOrders)} invoice${kpis.creditOrders === 1 ? '' : 's'} · applied as payment` : 'none in current view'
-  })), /*#__PURE__*/React.createElement("section", {
-    className: "section"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "section-header"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "section-title"
-  }, "Revenue ", /*#__PURE__*/React.createElement("em", null, "over time")), /*#__PURE__*/React.createElement("span", {
-    className: "section-meta"
-  }, timeSeries.length, " days")), /*#__PURE__*/React.createElement("div", {
-    className: "card",
-    style: {
-      height: 320
-    }
-  }, /*#__PURE__*/React.createElement(ResponsiveContainer, {
-    width: "100%",
-    height: "100%"
-  }, /*#__PURE__*/React.createElement(AreaChart, {
-    data: timeSeries,
-    margin: {
-      top: 12,
-      right: 12,
-      left: 0,
-      bottom: 0
-    }
-  }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("linearGradient", {
-    id: "revGrad",
-    x1: "0",
-    y1: "0",
-    x2: "0",
-    y2: "1"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0%",
-    stopColor: "#d24a92",
-    stopOpacity: 0.4
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "100%",
-    stopColor: "#d24a92",
-    stopOpacity: 0
-  }))), /*#__PURE__*/React.createElement(CartesianGrid, {
-    stroke: "#262c28",
-    strokeDasharray: "2 2",
-    vertical: false
-  }), /*#__PURE__*/React.createElement(XAxis, {
-    dataKey: "date",
-    stroke: "#5d6660",
-    tick: {
-      fontSize: 11,
-      fontFamily: 'JetBrains Mono'
-    },
-    tickLine: false,
-    axisLine: {
-      stroke: '#262c28'
-    }
-  }), /*#__PURE__*/React.createElement(YAxis, {
-    stroke: "#5d6660",
-    tick: {
-      fontSize: 11,
-      fontFamily: 'JetBrains Mono'
-    },
-    tickLine: false,
-    axisLine: false,
-    tickFormatter: fmtMoney
-  }), /*#__PURE__*/React.createElement(Tooltip, {
-    contentStyle: {
-      background: '#161a17',
-      border: '1px solid #262c28',
-      borderRadius: 4,
-      fontSize: 12
-    },
-    labelStyle: {
-      color: '#9aa39c',
-      fontFamily: 'JetBrains Mono',
-      fontSize: 11
-    },
-    itemStyle: {
-      color: '#e8ebe7'
-    },
-    formatter: (v, n) => n === 'revenue' ? [fmtMoneyFull(v), 'Revenue'] : [fmtNum(v), n]
-  }), /*#__PURE__*/React.createElement(Area, {
-    type: "monotone",
-    dataKey: "revenue",
-    stroke: "#d24a92",
-    strokeWidth: 2,
-    fill: "url(#revGrad)"
-  }))))), /*#__PURE__*/React.createElement("section", {
+  })), /*#__PURE__*/React.createElement(RevenueOverTime, { rows: filtered }), /*#__PURE__*/React.createElement(MonthlyGrossBySku, { rows: filtered }), /*#__PURE__*/React.createElement("section", {
     className: "section"
   }, /*#__PURE__*/React.createElement("div", {
     className: "section-header"
@@ -1558,87 +1775,33 @@ function Dashboard({
     className: "section-title"
   }, "Current ", /*#__PURE__*/React.createElement("em", null, "inventory")), /*#__PURE__*/React.createElement("span", {
     className: "section-meta"
-  }, inventory.skus > 0 ? `${fmtNum(inventory.skus)} products · live from product catalog` : 'awaiting scraper inventory pull')), inventory.skus > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, inventory.skus > 0 ? `${fmtNum(inventory.skus)} products · live from Apex inventory` : 'awaiting scraper inventory pull')), inventory.skus > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "kpi-grid",
     style: {
       marginBottom: 24
     }
   }, /*#__PURE__*/React.createElement(Kpi, {
-    label: "Available",
-    value: fmtNum(Math.round(inventory.availableTotal)),
-    sub: "units sellable now",
+    label: "On Hand Value",
+    value: fmtMoney(inventory.onHandValue),
+    sub: "est. value of stock",
     accent: true
-  }), /*#__PURE__*/React.createElement(Kpi, {
-    label: "Reserved",
-    value: fmtNum(Math.round(inventory.reservedTotal)),
-    sub: "held by open orders"
   }), /*#__PURE__*/React.createElement(Kpi, {
     label: "On Hand",
     value: fmtNum(Math.round(inventory.onHandTotal)),
-    sub: "total inventory"
+    sub: "total units in stock"
+  }), /*#__PURE__*/React.createElement(Kpi, {
+    label: "Listed",
+    value: fmtNum(inventory.listedN),
+    sub: "visible to buyers"
+  }), /*#__PURE__*/React.createElement(Kpi, {
+    label: "Products",
+    value: fmtNum(inventory.skus),
+    sub: "in catalog"
   }), /*#__PURE__*/React.createElement(Kpi, {
     label: "Out Of Stock",
     value: fmtNum(inventory.out),
     sub: `of ${fmtNum(inventory.skus)} products`
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "card",
-    style: {
-      padding: 0,
-      overflow: 'hidden'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      overflowX: 'auto',
-      maxHeight: 520
-    }
-  }, /*#__PURE__*/React.createElement("table", {
-    className: "data-table"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Product"), /*#__PURE__*/React.createElement("th", null, "Line"), /*#__PURE__*/React.createElement("th", null, "SKU"), /*#__PURE__*/React.createElement("th", {
-    className: "num"
-  }, "Units Sold"), /*#__PURE__*/React.createElement("th", {
-    className: "num"
-  }, "On Hand"), /*#__PURE__*/React.createElement("th", {
-    className: "num"
-  }, "Reserved"), /*#__PURE__*/React.createElement("th", {
-    className: "num"
-  }, "Available"), /*#__PURE__*/React.createElement("th", null, "Status"))), /*#__PURE__*/React.createElement("tbody", null, inventory.list.map((p, i) => /*#__PURE__*/React.createElement("tr", {
-    key: i
-  }, /*#__PURE__*/React.createElement("td", null, p.name), /*#__PURE__*/React.createElement("td", {
-    className: "dim"
-  }, p.line), /*#__PURE__*/React.createElement("td", {
-    className: "dim font-mono",
-    style: {
-      fontSize: 11
-    }
-  }, p.sku || '—'), /*#__PURE__*/React.createElement("td", {
-    className: "num dim"
-  }, fmtNum(Math.round(p.sold))), /*#__PURE__*/React.createElement("td", {
-    className: "num dim"
-  }, p.qty == null ? '—' : fmtNum(Math.round(p.qty))), /*#__PURE__*/React.createElement("td", {
-    className: "num dim"
-  }, p.reserved == null ? '—' : fmtNum(Math.round(p.reserved))), /*#__PURE__*/React.createElement("td", {
-    className: "num"
-  }, /*#__PURE__*/React.createElement("strong", {
-    style: {
-      color: p.inv == null ? 'var(--text-faint)' : p.inv <= 0 ? 'var(--rose)' : 'var(--accent)'
-    }
-  }, p.inv == null ? '—' : fmtNum(Math.round(p.inv)))), /*#__PURE__*/React.createElement("td", null, p.neverSold ? /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: 'JetBrains Mono',
-      fontSize: 10,
-      textTransform: 'uppercase',
-      letterSpacing: '0.08em',
-      color: 'var(--warm)',
-      border: '1px solid var(--warm)',
-      borderRadius: 2,
-      padding: '2px 6px',
-      whiteSpace: 'nowrap'
-    }
-  }, "Never sold") : /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: 'var(--text-faint)'
-    }
-  }, "\u2014"))))))))) : /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement(InventoryTable, { list: inventory.list })) : /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       padding: '24px',
@@ -1655,7 +1818,7 @@ function Dashboard({
     style: {
       color: 'var(--accent)'
     }
-  }, "LEAFLINK_PULL_INVENTORY=1"), " and run it once \u2014 the product catalog will populate this section automatically.")), /*#__PURE__*/React.createElement("section", {
+  }, "APEX_PULL_INVENTORY=1"), " and run it once \u2014 the inventory endpoint will populate this section automatically.")), /*#__PURE__*/React.createElement("section", {
     className: "section"
   }, /*#__PURE__*/React.createElement("div", {
     className: "grid-half"
@@ -1754,27 +1917,10 @@ function Dashboard({
     innerRadius: 60,
     outerRadius: 110,
     paddingAngle: 2,
-    stroke: "#110a1a",
+    stroke: "#0f1210",
     strokeWidth: 2
   }, byCategory.map((_, i) => {
-    // Dark-to-light purple/magenta ramp.
-    // Slices are sorted by revenue (largest first), so the darkest
-    // shade represents the biggest category and partitions are
-    // visibly distinct.
-    const colors = ['#3d1a4d',
-    // darkest — deep aubergine
-    '#5a2670',
-    // deep purple
-    '#7a3fa0',
-    // brand deep purple
-    '#a056c2',
-    // mid violet
-    '#c074d8',
-    // light violet
-    '#d8a3e8',
-    // soft lavender
-    '#ecd1f5' // lightest — pale lilac
-    ];
+    const colors = ['#d24a92', '#a03d75', '#b48fd4', '#f0a868', '#e07594', '#9aa39c', '#5d6660'];
     return /*#__PURE__*/React.createElement(Cell, {
       key: i,
       fill: colors[i % colors.length]
@@ -1901,7 +2047,7 @@ function Dashboard({
     key: i
   }, /*#__PURE__*/React.createElement("td", {
     className: "dim font-mono"
-  }, fmtDate(r._date || r.order_date_raw || r.order_date)), /*#__PURE__*/React.createElement("td", {
+  }, r.order_date || '—'), /*#__PURE__*/React.createElement("td", {
     className: "font-mono"
   }, "#", r.order_number || r.order_id || '—'), /*#__PURE__*/React.createElement("td", null, r.buyer_name || '—'), /*#__PURE__*/React.createElement("td", {
     className: "dim"
@@ -1987,174 +2133,59 @@ function FilterBar({
   filters,
   setFilters,
   distinct,
-  onReset
+  onReset,
+  rows
 }) {
-  const upd = (k, v) => setFilters(f => ({
-    ...f,
-    [k]: v
-  }));
-  return /*#__PURE__*/React.createElement("div", {
-    className: "filters"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "filter-group"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "filter-label"
-  }, "From"), /*#__PURE__*/React.createElement("input", {
-    type: "date",
-    className: "filter-input",
-    value: filters.from,
-    onChange: e => upd('from', e.target.value)
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "filter-group"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "filter-label"
-  }, "To"), /*#__PURE__*/React.createElement("input", {
-    type: "date",
-    className: "filter-input",
-    value: filters.to,
-    onChange: e => upd('to', e.target.value)
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "filter-group",
-    style: {
-      minWidth: 'auto'
-    }
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "filter-label"
-  }, "Quick range"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      gap: 6,
-      flexWrap: 'wrap'
-    }
-  }, [['Today', 0], ['Last wk', 7], ['30 days', 30], ['90 days', 90], ['YTD', 'ytd']].map(([lbl, d]) => /*#__PURE__*/React.createElement("button", {
-    key: lbl,
-    className: "date-preset",
-    onClick: () => {
-      const t = new Date();
-      const fmt = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
-      let from;
-      if (d === 'ytd') {
-        from = new Date(t.getFullYear(), 0, 1);
-      } else {
-        from = new Date(t);
-        from.setDate(from.getDate() - d);
+  const e = React.createElement;
+  const upd = (k, v) => setFilters(f => ({ ...f, [k]: v }));
+  const group = (label, control) => e("div", { className: "filter-group" },
+    e("label", { className: "filter-label" }, label), control);
+  const sel = (key, opts) => e("select", {
+    className: "filter-select", value: filters[key],
+    onChange: ev => upd(key, ev.target.value)
+  }, e("option", { value: "" }, "All"), opts.map(o => e("option", { key: o }, o)));
+
+  return e("div", { className: "filters" },
+    group("From", e("input", { type: "date", className: "filter-input", value: filters.from, onChange: ev => upd('from', ev.target.value) })),
+    group("To", e("input", { type: "date", className: "filter-input", value: filters.to, onChange: ev => upd('to', ev.target.value) })),
+    e("div", { className: "filter-group", style: { minWidth: 'auto' } },
+      e("label", { className: "filter-label" }, "Quick range"),
+      e("div", { style: { display: 'flex', gap: 6, flexWrap: 'wrap' } },
+        [['Today', 0], ['Last wk', 7], ['30 days', 30], ['90 days', 90], ['YTD', 'ytd']].map(([lbl, d]) =>
+          e("button", { key: lbl, className: "date-preset", onClick: () => {
+            const t = new Date();
+            const fmt = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
+            let from;
+            if (d === 'ytd') { from = new Date(t.getFullYear(), 0, 1); }
+            else { from = new Date(t); from.setDate(from.getDate() - d); }
+            setFilters(f => ({ ...f, from: fmt(from), to: fmt(t) }));
+          } }, lbl)))),
+    group("Product", e("input", { type: "text", className: "filter-input", placeholder: "search products\u2026", value: filters.product, onChange: ev => upd('product', ev.target.value) })),
+    group("Sales Rep", sel('rep', distinct.reps)),
+    group("Buyer", sel('buyer', distinct.buyers)),
+    group("Payment", sel('status', distinct.statuses)),
+    group("Invoice #", e("input", { type: "text", className: "filter-input", placeholder: "search\u2026", value: filters.invoice, onChange: ev => upd('invoice', ev.target.value) })),
+    group("Product Line", sel('productLine', distinct.productLines)),
+    e("div", { className: "filter-group", style: { justifyContent: 'flex-end' } },
+      e("label", { className: "filter-label", style: { display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginTop: 'auto', paddingBottom: 9 } },
+        e("input", { type: "checkbox", checked: filters.excludeSamples, onChange: ev => upd('excludeSamples', ev.target.checked), style: { accentColor: 'var(--accent)', width: 14, height: 14 } }),
+        "Exclude samples")),
+    e("div", { className: "filter-group", style: { minWidth: 'auto', marginLeft: 'auto', alignSelf: 'flex-end' } },
+      e("label", { className: "filter-label" }, "Download report"),
+      e("div", { style: { display: 'flex', gap: 6 } },
+        e("button", { className: "date-preset", onClick: () => downloadReportExcel(rows, filters), title: "Download the report as Excel, using the filters currently applied" }, "\u2b07 Excel"),
+        e("button", { className: "date-preset", onClick: () => downloadReportPDF(rows, filters), title: "Download the report as PDF, using the filters currently applied" }, "\u2b07 PDF"))),
+    e("button", {
+      className: "filter-reset",
+      onClick: onReset,
+      style: {
+        marginLeft: 16, alignSelf: 'flex-end',
+        background: 'var(--accent)', color: '#0d0f0e', border: 'none',
+        fontWeight: 700, padding: '10px 22px', borderRadius: 6,
+        boxShadow: '0 2px 12px rgba(210,74,146,0.45)', cursor: 'pointer',
+        letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: 12
       }
-      setFilters(f => ({
-        ...f,
-        from: fmt(from),
-        to: fmt(t)
-      }));
-    }
-  }, lbl)))), /*#__PURE__*/React.createElement("div", {
-    className: "filter-group"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "filter-label"
-  }, "Brand"), /*#__PURE__*/React.createElement("select", {
-    className: "filter-select",
-    value: filters.brand,
-    onChange: e => upd('brand', e.target.value)
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "All"), distinct.brands.map(b => /*#__PURE__*/React.createElement("option", {
-    key: b
-  }, b)))), /*#__PURE__*/React.createElement("div", {
-    className: "filter-group"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "filter-label"
-  }, "Sales Rep"), /*#__PURE__*/React.createElement("select", {
-    className: "filter-select",
-    value: filters.rep,
-    onChange: e => upd('rep', e.target.value)
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "All"), distinct.reps.map(b => /*#__PURE__*/React.createElement("option", {
-    key: b
-  }, b)))), /*#__PURE__*/React.createElement("div", {
-    className: "filter-group"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "filter-label"
-  }, "Buyer"), /*#__PURE__*/React.createElement("select", {
-    className: "filter-select",
-    value: filters.buyer,
-    onChange: e => upd('buyer', e.target.value)
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "All"), distinct.buyers.map(b => /*#__PURE__*/React.createElement("option", {
-    key: b
-  }, b)))), /*#__PURE__*/React.createElement("div", {
-    className: "filter-group"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "filter-label"
-  }, "State"), /*#__PURE__*/React.createElement("select", {
-    className: "filter-select",
-    value: filters.state,
-    onChange: e => upd('state', e.target.value)
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "All"), distinct.states.map(b => /*#__PURE__*/React.createElement("option", {
-    key: b
-  }, b)))), /*#__PURE__*/React.createElement("div", {
-    className: "filter-group"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "filter-label"
-  }, "Payment"), /*#__PURE__*/React.createElement("select", {
-    className: "filter-select",
-    value: filters.status,
-    onChange: e => upd('status', e.target.value)
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "All"), distinct.statuses.map(b => /*#__PURE__*/React.createElement("option", {
-    key: b
-  }, b)))), /*#__PURE__*/React.createElement("div", {
-    className: "filter-group"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "filter-label"
-  }, "Invoice #"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    className: "filter-input",
-    placeholder: "search\u2026",
-    value: filters.invoice,
-    onChange: e => upd('invoice', e.target.value)
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "filter-group"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "filter-label"
-  }, "Product Line"), /*#__PURE__*/React.createElement("select", {
-    className: "filter-select",
-    value: filters.productLine,
-    onChange: e => upd('productLine', e.target.value)
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "All"), distinct.productLines.map(b => /*#__PURE__*/React.createElement("option", {
-    key: b
-  }, b)))), /*#__PURE__*/React.createElement("div", {
-    className: "filter-group",
-    style: {
-      justifyContent: 'flex-end'
-    }
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "filter-label",
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 8,
-      cursor: 'pointer',
-      marginTop: 'auto',
-      paddingBottom: 9
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: filters.excludeSamples,
-    onChange: e => upd('excludeSamples', e.target.checked),
-    style: {
-      accentColor: 'var(--accent)',
-      width: 14,
-      height: 14
-    }
-  }), "Exclude samples")), /*#__PURE__*/React.createElement("button", {
-    className: "filter-reset",
-    onClick: onReset
-  }, "Reset"));
+    }, "Reset"));
 }
 function Kpi({
   label,
@@ -2243,13 +2274,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.c
     var libs = { React: typeof window.React, ReactDOM: typeof window.ReactDOM, Recharts: typeof window.Recharts };
     var missing = Object.keys(libs).filter(function (k) { return libs[k] === 'undefined'; });
     var why = missing.length
-      ? 'These library files did not load: <b>' + missing.join(', ') + '</b>. Make sure all the .js library files were uploaded into the same folder as dashboard.html.'
+      ? 'These library files did not load: <b>' + missing.join(', ') + '</b>. Make sure react.production.min.js, react-dom.production.min.js, prop-types.min.js and Recharts.js were uploaded into the same folder as dashboard.html.'
       : 'The libraries loaded but the app did not render. A hard refresh usually clears this.';
     root.innerHTML =
       '<div style="max-width:680px;margin:80px auto;padding:28px;background:var(--bg-elev,#161a17);border:1px solid var(--border,#262c28);border-left:3px solid var(--warm,#e0a85a);border-radius:10px;color:var(--text,#e8ebe7);font-family:Inter,system-ui,sans-serif">'
       + '<div style="font-family:Fraunces,serif;font-size:22px;font-style:italic;margin-bottom:10px">Dashboard didn\u2019t load</div>'
       + '<p style="color:var(--text-dim,#9aa39c);line-height:1.7;font-size:14px;margin:0 0 12px">' + why + '</p>'
-      + '<button onclick="location.reload()" style="background:var(--accent,#4dd4ff);border:none;color:var(--bg,#0a1220);font-weight:600;padding:9px 16px;border-radius:7px;cursor:pointer;font-family:JetBrains Mono,monospace;font-size:12px">Reload</button>'
+      + '<button onclick="location.reload()" style="background:var(--accent,#d24a92);border:none;color:var(--bg,#0a1220);font-weight:600;padding:9px 16px;border-radius:7px;cursor:pointer;font-family:JetBrains Mono,monospace;font-size:12px">Reload</button>'
       + '</div>';
   }
   setTimeout(diagnose, 5000);
