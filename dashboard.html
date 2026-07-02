@@ -107,6 +107,16 @@
     50% { opacity: 0.3; }
   }
 
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    width: 44px; height: 44px;
+    margin: 0 auto 20px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
   /* Filter bar */
   .filters {
     display: flex; gap: 16px; flex-wrap: wrap;
@@ -822,7 +832,7 @@ function MonthlyGrossBySku({ rows }) {
   const stick = { position: 'sticky', left: 0, background: 'var(--bg-elev)', zIndex: 1 };
   const mlabel = ym => { const p = ym.split('-'); return MONTHS[parseInt(p[1], 10) - 1] + " '" + p[0].slice(2); };
   const cell = v => v ? fmtMoney(v) : e("span", { className: "dim" }, "\u2014");
-  const sel = (val, set, opts) => e("select", { className: "filter-select", value: val, onChange: ev => set(ev.target.value), style: { minWidth: 88, height: 30 } },
+  const sel = (val, set, opts) => e("select", { className: "filter-select", value: val, onChange: ev => set(ev.target.value), style: { minWidth: 88, height: 30, fontSize: 11 } },
     opts.map(o => e("option", { key: o.v, value: o.v }, o.l)));
   return e("section", { className: "section" },
     e("div", { className: "section-header" },
@@ -909,7 +919,7 @@ function App() {
       className: "app"
     }, /*#__PURE__*/React.createElement("div", {
       className: "empty"
-    }, /*#__PURE__*/React.createElement("h2", null, "Loading\u2026")));
+    }, /*#__PURE__*/React.createElement("div", { className: "spinner" }), /*#__PURE__*/React.createElement("h2", null, "Loading\u2026")));
   }
   return /*#__PURE__*/React.createElement(Dashboard, {
     data: data,
