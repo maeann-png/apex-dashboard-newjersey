@@ -1318,14 +1318,14 @@ function Dashboard({
       const sold = p.sku && soldBySku[p.sku] != null ? soldBySku[p.sku] : soldByName[p.name] || 0;
       const revT = p.sku && revBySku[p.sku] != null ? revBySku[p.sku] : revByName[p.name] || 0;
       const unitPrice = sold > 0 ? revT / sold : 0;
-      const qty = p.qty != null ? p.qty : null;
+      const qty = p.qty != null ? p.qty : (p.available != null ? p.available : (p.inventory != null ? p.inventory : null));
       return {
         name: p.name || '—',
         line: p.line || '—',
         sku: p.sku || '',
         qty,
         batches: p.batches || 0,
-        listed: !!p.listed,
+        listed: p.listed != null ? !!p.listed : (p.status ? String(p.status).toLowerCase() === 'available' : false),
         sold,
         neverSold: sold <= 0,
         unitPrice,
